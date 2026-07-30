@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request
 from storage.blob_storage import BlobStorage
+from etl.extract import read_csv_from_blob
+from etl.transform import transform_sales
+from etl.load import load_sales
 import os
 
 app = Flask(__name__)
@@ -37,8 +40,27 @@ def upload():
 
     filename = blob.upload_file(file)
 
-    return f"{filename} uploaded successfully to Azure Blob Storage!"
+    df = read_csv_from_blob(filename)
 
+    df = transform_sales(df)
+
+    load_sales(df)
+
+    return f"""
+    <h2>ETL Completed Successfully</h2>
+
+    File : {filename}<br>
+
+    Records Loaded : {len(df)}
+
+    <br><br>
+
+    <a href='/'>Home</a>
+
+    <br>
+
+    <a href='/dashboard'>Dashboard</a>
+    """
 
 @app.route("/dashboard")
 def dashboard():
