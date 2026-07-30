@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 from config import Config
+from database.models import Base
 
 connection_url = URL.create(
     drivername="postgresql+psycopg2",
@@ -22,3 +23,7 @@ def test_connection():
     except Exception as ex:
         print("❌ Connection failed")
         print(ex)
+
+def create_tables():
+    Base.metadata.create_all(engine)
+    print("✅ Sales table created (or already exists).")
