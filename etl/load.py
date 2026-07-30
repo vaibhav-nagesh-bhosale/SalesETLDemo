@@ -7,7 +7,12 @@ def load_sales(df):
     print("Loading records into PostgreSQL...")
 
     with engine.begin() as conn:
+        print("Current Database:",
+              conn.execute(text("SELECT current_database()")).scalar())
 
+        print("Sales Before:",
+              conn.execute(text("SELECT COUNT(*) FROM sales")).scalar())
+        
         for _, row in df.iterrows():
 
             print(row.to_dict())
@@ -50,4 +55,6 @@ def load_sales(df):
                 }
             )
 
+        print("Sales After:",conn.execute(text("SELECT COUNT(*) FROM sales")).scalar())
+    
     print("Finished loading.")

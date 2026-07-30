@@ -4,6 +4,9 @@ from etl.extract import read_csv_from_blob
 from etl.transform import transform_sales
 from etl.load import load_sales
 import os
+import time
+from etl.job_logger import log_job
+
 
 app = Flask(__name__)
 blob = BlobStorage()
@@ -33,34 +36,54 @@ def uploadlocal():
 @app.route("/upload", methods=["POST"])
 def upload():
 
-    file = request.files["file"]
+    start = time.time()
 
-    if file.filename == "":
-        return "No file selected"
+    try:
+        file = request.files["file"]
 
-    filename = blob.upload_file(file)
+        if file.filename == "":
+            return "No file selected"
 
-    df = read_csv_from_blob(filename)
+        filename = blob.upload_file(file)
 
-    df = transform_sales(df)
+        df = read_csv_from_blob(filename)
+        df = transform_sales(df)
+        load_sales(df)
 
-    load_sales(df)
+        duration = round(time.time() - start, 2)
 
-    return f"""
-    <h2>ETL Completed Successfully</h2>
+        log_job(
+            filename,
+            len(df),
+            "SUCCESS",
+            duration,
+        )
 
-    File : {filename}<br>
+        return f"""
+        <h2>ETL Completed Successfully</h2>
 
-    Records Loaded : {len(df)}
+        File : {filename}<br>
 
-    <br><br>
+        Records Loaded : {len(df)}
 
-    <a href='/'>Home</a>
+        <br><br>
 
-    <br>
+        <a href='/'>Home</a>
 
-    <a href='/dashboard'>Dashboard</a>
-    """
+        <br>
+
+        <a href='/dashboard'>Dashboard</a>
+        """
+    except Exception as ex:
+        duration = round(time.time() - start, 2)
+        log_job(
+            locals().get("filename", ""),
+            0,
+            "FAILED",
+            duration,
+            str(ex),
+        )
+        return str(ex)
 
 @app.route("/dashboard")
 def dashboard():
