@@ -6,6 +6,11 @@ from etl.load import load_sales
 import os
 import time
 from etl.job_logger import log_job
+from etl.upload_logger import log_uploaded_file
+from services.dashboard_service import DashboardService
+from flask import redirect
+from flask import url_for
+
 
 
 app = Flask(__name__)
@@ -46,6 +51,20 @@ def upload():
 
         filename = blob.upload_file(file)
 
+        log_uploaded_file(
+
+            filename,
+
+            f"salesfiles/{filename}",
+
+            file.content_length,
+
+            "Admin",
+
+            "Uploaded"
+
+        )
+
         df = read_csv_from_blob(filename)
         df = transform_sales(df)
         load_sales(df)
@@ -58,7 +77,7 @@ def upload():
             "SUCCESS",
             duration,
         )
-
+        return redirect(url_for("dashboard"))
         return f"""
         <h2>ETL Completed Successfully</h2>
 
@@ -88,7 +107,23 @@ def upload():
 @app.route("/dashboard")
 def dashboard():
 
-    return "<h2>Dashboard Coming Soon</h2>"
+    summary = DashboardService.get_summary()
+
+    jobs = DashboardService.get_recent_jobs()
+
+    sales = DashboardService.get_sales()
+
+    return render_template(
+
+        "dashboard.html",
+
+        summary=summary,
+
+        jobs=jobs,
+
+        sales=sales
+
+    )
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, Text
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, Text,BigInteger
 from sqlalchemy.sql import func
 
 
@@ -45,3 +45,23 @@ class ETLJobHistory(Base):
 
     end_time = Column(DateTime(timezone=True),
                       server_default=func.now())
+
+
+class UploadedFile(Base):
+
+    __tablename__ = "uploaded_files"
+
+    file_id = Column(Integer, primary_key=True)
+
+    file_name = Column(String(255))
+
+    blob_path = Column(String(500))
+
+    file_size = Column(BigInteger)
+
+    uploaded_at = Column(DateTime(timezone=True),
+                         server_default=func.now())
+
+    uploaded_by = Column(String(100))
+
+    processing_status = Column(String(20))
