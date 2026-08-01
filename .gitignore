@@ -7,12 +7,14 @@ __pycache__/
 
 # Environment Variables
 .env
+*.log
 
 # VS Code
 .vscode/
 
 # Logs
-logs/
+logs/*
 
 # Upload Folder
 uploads/*.csv
+uploads/*
