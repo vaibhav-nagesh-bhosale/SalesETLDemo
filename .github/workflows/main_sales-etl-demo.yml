@@ -77,7 +77,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'sales-etl-demo'
+          app-name: 'sales-etl-demo-dpczhxeagzcucegg'
           slot-name: 'Production'
           package: '.'
           startup-command: 'gunicorn --bind=0.0.0.0 --timeout 600 app:app'
